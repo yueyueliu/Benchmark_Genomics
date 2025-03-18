@@ -1,0 +1,12 @@
+# 基础依赖
+numpy  # 基础科学计算
+pandas  # 数据处理
+torch  # 深度学习框架
+tqdm  # 进度条
+requests  # HTTP请求
+scikit-learn  # 机器学习工具
+
+# 开发依赖
+pytest  # 用于测试
+black  # 用于代码格式化
+flake8  # 用于代码检查 
