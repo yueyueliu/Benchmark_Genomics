@@ -1,5 +1,5 @@
 """
-数据下载模块，提供基础的数据下载和缓存功能
+Data download module providing basic data download and caching functionality
 """
 import os
 import hashlib
@@ -7,55 +7,57 @@ import requests
 from pathlib import Path
 from tqdm import tqdm
 from typing import Optional, Union
-from genomics_benchmark.data.base_dataset import BaseDataset
 
 class DataDownloader:
-    """数据下载器基类"""
+    """Base data downloader class"""
     
-    def __init__(self, cache_dir: Optional[Union[str, Path]] = None):
+    def __init__(self, cache_dir: Union[str, Path]):
         """
-        初始化数据下载器
+        Initialize data downloader
         
         Args:
-            cache_dir: 数据缓存目录，默认为用户主目录下的.cache/genomics_benchmark
+            cache_dir: Data cache directory
         """
-        if cache_dir is None:
-            cache_dir = os.path.expanduser("~/.cache/genomics_benchmark")
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
     
     def _get_cache_path(self, url: str) -> Path:
         """
-        根据URL生成缓存文件路径
+        Generate cache file path from URL
         
         Args:
-            url: 数据文件的URL
+            url: URL of the data file
             
         Returns:
-            缓存文件路径
+            Cache file path
         """
-        # 使用URL的MD5作为文件名
-        url_hash = hashlib.md5(url.encode()).hexdigest()
-        return self.cache_dir / url_hash
+        # Extract filename from URL
+        filename = url.split('/')[-1]
+        # If no filename in URL, use MD5 of URL as filename
+        if not filename or '?' in filename:
+            filename = hashlib.md5(url.encode()).hexdigest()
+        return self.cache_dir / filename
     
     def download(self, url: str, force: bool = False) -> Path:
         """
-        下载数据文件
+        Download data file
         
         Args:
-            url: 数据文件的URL
-            force: 是否强制重新下载
+            url: URL of the data file
+            force: Whether to force re-download
             
         Returns:
-            下载文件的路径
+            Path to the downloaded file
         """
         cache_path = self._get_cache_path(url)
         
         if not force and cache_path.exists():
-            print(f"使用缓存文件: {cache_path}")
+            print(f"Using cached file: {cache_path}")
             return cache_path
         
-        print(f"下载文件: {url}")
+        print(f"Downloading file: {url}")
+        print(f"Saving to: {cache_path}")
+        
         response = requests.get(url, stream=True)
         response.raise_for_status()
         
@@ -63,7 +65,7 @@ class DataDownloader:
         block_size = 8192
         
         with open(cache_path, 'wb') as f, tqdm(
-            desc="下载进度",
+            desc="Download progress",
             total=total_size,
             unit='iB',
             unit_scale=True,
@@ -76,22 +78,7 @@ class DataDownloader:
         return cache_path
     
     def clear_cache(self):
-        """清除所有缓存文件"""
+        """Clear all cached files"""
         for file in self.cache_dir.glob("*"):
             file.unlink()
-        print(f"已清除缓存目录: {self.cache_dir}")
-
-# 创建数据集实例
-dataset = BaseDataset(
-    task_name="gene_expression",
-    dataset_name="kiver"
-)
-
-# 下载数据
-dataset.download()
-
-# 加载并预处理数据
-processed_data = dataset.load()
-
-# 获取训练集数据
-train_data = dataset.get_data(split="train") 
+        print(f"Cache directory cleared: {self.cache_dir}")

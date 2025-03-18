@@ -1,57 +1,65 @@
 """
-数据集配置文件，包含各个数据集的元数据信息
+Dataset configuration file containing metadata for each dataset
 """
 
 DATASET_CONFIG = {
-    "gene_expression": {
-        "kiver": {
-            "name": "Kiver Gene Expression",
-            "description": "Kiver细胞系的基因表达数据",
-            "data_url": "https://example.com/kiver_data",  # 需要替换为实际的数据URL
-            "file_format": "csv",
-            "preprocessing_steps": [
-                "数据清洗",
-                "标准化",
-                "特征选择"
-            ],
-            "evaluation_metrics": [
-                "MSE",
-                "R2",
-                "Pearson相关系数"
+    # Reference genome configuration
+    "reference_genome": {
+        "hg19": {
+            "fasta_url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz",
+            "gtf_url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz"
+        },
+        "hg38": {
+            "fasta_url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_47/GRCh38.p14.genome.fa.gz",
+            "gtf_url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_47/gencode.v47.annotation.gtf.gz"
+        },
+        "mm10": {
+            "fasta_url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M36/GRCm39.genome.fa.gz",
+            "gtf_url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M36/gencode.vM36.annotation.gtf.gz"
+        }
+    },
+    
+    "enhancer": {
+        # Task-level common configuration
+        "task_config": {
+            "required_columns": {
+                "enhancer_loc": ["chr", "start", "end"],  # Enhancer location
+                "gene_info": ["gene_name", "gene_tss"],  # Gene information
+                "effect": ["Normalized HiC Contacts", "H3K27ac (RPM)", "Activity"],  # Effect size
+                "ABC Score": ["ABC Score"],
+                "label": "Significant"  # Calculated label
+            },
+            "distance_threshold": 1000000,  # Enhancer-gene distance threshold in bp
+            "output_columns": [
+                "chr", "start", "end",  # Enhancer location
+                # "strand",
+                "gene_name", "gene_tss",  # Gene information
+                "distance",  # Calculated distance
+                "ABC Score",  # Effect size
+                "labels"  # Calculated label
             ]
         },
-        "k562": {
-            "name": "K562 Gene Expression",
-            "description": "K562细胞系的基因表达数据",
-            "data_url": "https://example.com/k562_data",  # 需要替换为实际的数据URL
-            "file_format": "csv",
-            "preprocessing_steps": [
-                "数据清洗",
-                "标准化",
-                "特征选择"
-            ],
-            "evaluation_metrics": [
-                "MSE",
-                "R2",
-                "Pearson相关系数"
-            ]
+        # Dataset-specific configuration
+        "fulco": {
+            "name": "Fulco Enhancer Dataset",
+            "description": "Fulco K562 enhancer dataset",
+            "genome_version": "hg19",  # Add genome version information
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/Fulco/41588_2019_538_MOESM3_ESM.xlsx",
+            "file_format": "xlsx",
+            "column_mapping": {
+                # Mapping from source column names to standard column names
+                "chr": "chr",
+                "start": "start",
+                "end": "end",
+                "gene_name": "Gene",
+                "gene_tss": "Gene TSS",
+                "Normalized HiC Contacts": "Normalized HiC Contacts",
+                "H3K27ac (RPM)": "H3K27ac (RPM)",
+                "Activity": "Activity",
+                "ABC Score": "ABC Score",
+                "Significant": "Significant"
+            }
         }
+        # More datasets can be added...
     }
-}
-
-def get_dataset_config(task_name: str, dataset_name: str) -> dict:
-    """
-    获取指定任务和数据集的配置信息
-    
-    Args:
-        task_name: 任务名称，如 'gene_expression'
-        dataset_name: 数据集名称，如 'kiver'
-    
-    Returns:
-        包含数据集配置信息的字典
-    """
-    if task_name not in DATASET_CONFIG:
-        raise ValueError(f"未知的任务名称: {task_name}")
-    if dataset_name not in DATASET_CONFIG[task_name]:
-        raise ValueError(f"未知的数据集名称: {dataset_name}")
-    return DATASET_CONFIG[task_name][dataset_name] 
+} 

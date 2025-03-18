@@ -1,48 +1,60 @@
 """
-数据集基类，整合数据下载和预处理功能
+Base dataset class that integrates data download and preprocessing functionality
 """
+import os
 from pathlib import Path
 from typing import Optional, Union, Dict, Any
 from .download import DataDownloader
-from .preprocessing import DataPreprocessor
-from .dataset_config import get_dataset_config
+from .reference_genome import get_dataset_config
 
 class BaseDataset:
-    """数据集基类"""
+    """Base dataset class"""
     
     def __init__(
         self,
         task_name: str,
         dataset_name: str,
-        cache_dir: Optional[Union[str, Path]] = None
+        cache_root: Optional[Union[str, Path]] = None
     ):
         """
-        初始化数据集
+        Initialize dataset
         
         Args:
-            task_name: 任务名称
-            dataset_name: 数据集名称
-            cache_dir: 缓存目录
+            task_name: Name of the task
+            dataset_name: Name of the dataset
+            cache_root: Cache root directory, defaults to .cache/genomics_benchmark in user's home directory
         """
         self.task_name = task_name
         self.dataset_name = dataset_name
-        self.config = get_dataset_config(task_name, dataset_name)
-        self.downloader = DataDownloader(cache_dir)
-        self.preprocessor = DataPreprocessor()
         
-        # 数据文件路径
+        # Set cache root directory
+        if cache_root is None:
+            cache_root = os.path.expanduser("~/.cache/genomics_benchmark")
+        self.cache_root = Path(cache_root)
+        
+        # Create task and dataset specific cache directories
+        self.cache_dir = self.cache_root / task_name / dataset_name
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Get configuration
+        self.config = get_dataset_config(task_name, dataset_name)
+        
+        # Initialize downloader and preprocessor
+        self.downloader = DataDownloader(self.cache_dir)
+        
+        # Data file paths
         self.data_path = None
         self.processed_data = None
     
     def download(self, force: bool = False) -> Path:
         """
-        下载数据集
+        Download dataset
         
         Args:
-            force: 是否强制重新下载
+            force: Whether to force re-download
             
         Returns:
-            下载文件的路径
+            Path to the downloaded file
         """
         self.data_path = self.downloader.download(
             self.config["data_url"],
@@ -50,59 +62,33 @@ class BaseDataset:
         )
         return self.data_path
     
-    def load(self) -> Dict[str, Any]:
+    def clear_cache(self, clear_all: bool = False):
         """
-        加载并预处理数据
-        
-        Returns:
-            处理后的数据字典
-        """
-        if self.data_path is None:
-            self.download()
-        
-        # 加载原始数据
-        raw_data = self.preprocessor.load_data(self.data_path)
-        
-        # 数据清洗
-        cleaned_data = self.preprocessor.clean_data(raw_data)
-        
-        # 数据标准化
-        normalized_data = self.preprocessor.normalize_data(cleaned_data)
-        
-        # 划分数据集
-        X_train, y_train, X_val, y_val, X_test, y_test = self.preprocessor.split_data(
-            normalized_data,
-            cleaned_data["target"].values  # 假设标签列名为"target"
-        )
-        
-        self.processed_data = {
-            "train": {"X": X_train, "y": y_train},
-            "val": {"X": X_val, "y": y_val},
-            "test": {"X": X_test, "y": y_test}
-        }
-        
-        return self.processed_data
-    
-    def get_data(self, split: str = "train") -> Dict[str, Any]:
-        """
-        获取指定划分的数据
+        Clear cache
         
         Args:
-            split: 数据集划分，可选 "train", "val", "test"
-            
-        Returns:
-            指定划分的特征和标签
+            clear_all: Whether to clear cache for all tasks, defaults to clearing only current dataset cache
         """
-        if self.processed_data is None:
-            self.load()
+        if clear_all:
+            # Clear all cache
+            if self.cache_root.exists():
+                for path in self.cache_root.glob("**/*"):
+                    if path.is_file():
+                        path.unlink()
+                for path in reversed(list(self.cache_root.glob("**/*"))):
+                    if path.is_dir():
+                        path.rmdir()
+        else:
+            # Clear only current dataset cache
+            if self.cache_dir.exists():
+                for file in self.cache_dir.glob("*"):
+                    file.unlink()
+                self.cache_dir.rmdir()
         
-        if split not in self.processed_data:
-            raise ValueError(f"未知的数据集划分: {split}")
-        
-        return self.processed_data[split]
-    
-    def clear_cache(self):
-        """清除缓存"""
-        self.downloader.clear_cache()
         self.data_path = None
-        self.processed_data = None 
+        self.processed_data = None
+    
+    @property
+    def cache_path(self) -> Path:
+        """Get cache directory for current dataset"""
+        return self.cache_dir 
