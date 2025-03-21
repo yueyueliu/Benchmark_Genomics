@@ -13,7 +13,7 @@ from genomics_benchmark.data import EnhancerProcessor
 
 def main():
     # Set cache root and output path
-    dataset_name = "Merged"
+    dataset_name = "Gasperini" # "Fulco" # "Schraivogel" #"ABC_fulco" # "Merged"
     cache_root = "/storage/zhangkaiLab/liuyue87/Projects/Benchmark_Genomics/data/cache"
     output_path = "/storage/zhangkaiLab/liuyue87/Projects/Benchmark_Genomics/data/demo_data/enhancer/" + dataset_name + "/processed_data.tsv"
     

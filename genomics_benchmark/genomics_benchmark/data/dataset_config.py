@@ -41,8 +41,9 @@ DATASET_CONFIG = {
             "name": "Fulco Enhancer Dataset",
             "description": "Fulco K562 enhancer dataset",
             "genome_version": "hg19",  # Add genome version information
-            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/Fulco/41588_2019_538_MOESM3_ESM.xlsx",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/ABC_Fulco.xlsx",
             "file_format": "xlsx",
+            "label_column": "Significant",  # ABC_fulco数据集的标签列名
             "column_mapping": {
                 # Mapping from source column names to standard column names
                 "chr": "chr",
@@ -62,8 +63,9 @@ DATASET_CONFIG = {
             "name": "E2G Enhancer Dataset",
             "description": "E2G K562 enhancer dataset",
             "genome_version": "hg38",
-            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/E2G/E2g.tsv",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/Merged.tsv",
             "file_format": "tsv",
+            "label_column": "Regulated",  # Merged数据集的标签列名
             "column_mapping": {
                 # Mapping from source column names to standard column names
                 "chr": "chrom",
@@ -80,6 +82,78 @@ DATASET_CONFIG = {
             },
             "additional_columns": [
                 "EffectSize",  
+            ]
+        },
+        "Fulco": {
+            "name": "Fulco K562 Enhancer Dataset",
+            "description": "Fulco K562 enhancer dataset in TSV format",
+            "genome_version": "hg38",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/Fulco.tsv",
+            "file_format": "tsv",
+            "label_column": "Regulated",
+            "column_mapping": {
+                "chr": "chrom",
+                "start": "chromStart",
+                "end": "chromEnd",
+                "gene_name": "measuredGeneSymbol",
+                "gene_tss": "startTSS",
+                "ABC Score": "ABCScoreDNaseOnlyAvgHicTrack2",
+                "Significant": "Significant",
+                "hic_contact": "3DContactAvgHicTrack2",
+                "hic_contact_squared": "3DContactAvgHicTrack2_squared",
+                "activity_enh": "activityEnhDNaseOnlyAvgHicTrack2_squared",
+                "activity_prom": "activityPromDNaseOnlyAvgHicTrack2",
+            },
+            "additional_columns": [
+                "EffectSize",
+            ]
+        },
+        "Gasperini": {
+            "name": "Gasperini K562 Enhancer Dataset",
+            "description": "Gasperini K562 enhancer dataset",
+            "genome_version": "hg38",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/Gasperini.tsv",
+            "file_format": "tsv",
+            "label_column": "Regulated",
+            "column_mapping": {
+                "chr": "chrom",
+                "start": "chromStart",
+                "end": "chromEnd",
+                "gene_name": "measuredGeneSymbol",
+                "gene_tss": "startTSS",
+                "ABC Score": "ABCScoreDNaseOnlyAvgHicTrack2",
+                "Significant": "Significant",
+                "hic_contact": "3DContactAvgHicTrack2",
+                "hic_contact_squared": "3DContactAvgHicTrack2_squared",
+                "activity_enh": "activityEnhDNaseOnlyAvgHicTrack2_squared",
+                "activity_prom": "activityPromDNaseOnlyAvgHicTrack2",
+            },
+            "additional_columns": [
+                "EffectSize",
+            ]
+        },
+        "Schraivogel": {
+            "name": "Schraivogel K562 Enhancer Dataset",
+            "description": "Schraivogel K562 enhancer dataset",
+            "genome_version": "hg38",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/Schraivogel.tsv",
+            "file_format": "tsv",
+            "label_column": "Regulated",
+            "column_mapping": {
+                "chr": "chrom",
+                "start": "chromStart",
+                "end": "chromEnd",
+                "gene_name": "measuredGeneSymbol",
+                "gene_tss": "startTSS",
+                "ABC Score": "ABCScoreDNaseOnlyAvgHicTrack2",
+                "Significant": "Significant",
+                "hic_contact": "3DContactAvgHicTrack2",
+                "hic_contact_squared": "3DContactAvgHicTrack2_squared",
+                "activity_enh": "activityEnhDNaseOnlyAvgHicTrack2_squared",
+                "activity_prom": "activityPromDNaseOnlyAvgHicTrack2",
+            },
+            "additional_columns": [
+                "EffectSize",
             ]
         }
         # More datasets can be added...

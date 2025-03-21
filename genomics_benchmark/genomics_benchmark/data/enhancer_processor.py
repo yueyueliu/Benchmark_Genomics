@@ -118,8 +118,11 @@ class EnhancerProcessor(BaseDataset):
         # Calculate distance to TSS
         df['distance'] = abs(df['enhancer_center'] - df['gene_tss'])
         
+        # 从数据集配置中获取标签列名
+        label_column = self.config["label_column"]
+        
         # Determine regulatory labels based on effect size
-        df['labels'] = df['Significant'].apply(lambda x: 1 if x == 1 else 0)
+        df['labels'] = df[label_column].apply(lambda x: 1 if x == 1 else 0)
         
         return df
     
@@ -257,6 +260,9 @@ class EnhancerProcessor(BaseDataset):
         gene_annotation = gene_annotation[gene_annotation['type'] == 'gene']
         gene_annotation['gene_name'] = gene_annotation['attribute'].str.extract(r'gene_name "(.*?)";')
         gene_annotation['gene_name'] = gene_annotation['gene_name'].str.replace('"', '')
+        
+        # 如果存在重复的gene_name，保留第一个出现的strand信息
+        gene_annotation = gene_annotation.drop_duplicates(subset=['gene_name'], keep='first')
         gene_annotation = gene_annotation[['gene_name', 'strand']]
         
         # Merge strand information
