@@ -140,25 +140,41 @@ class EnhancerProcessor(BaseDataset):
         elif 'distance_threshold' in self.config:
             df = df[df['distance'] <= self.config['distance_threshold']]
             
-        return df[self.config['output_columns']]
+        # Get all columns to keep
+        columns_to_keep = self.config["output_columns"].copy()
+        if "additional_columns" in self.config:
+            columns_to_keep.extend(self.config["additional_columns"])
+            
+        return df[columns_to_keep]
     
-    def save_processed_data(self, output_path: str):
+    def save_processed_data(self, output_path: Union[str, Path]) -> None:
         """
-        Save processed data
+        Save processed data to file
         
         Args:
-            output_path: Output file path
+            output_path: Path to save the processed data
         """
-        # Process data
-        processed_data = self.load()
-        
-        # Create output directory
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
-        # Save as TSV file
-        processed_data.to_csv(output_path, sep='\t', index=False)
+        # Get output columns from config
+        output_columns = self.config["task_config"]["output_columns"].copy()
+        
+        # Add additional columns if specified
+        if "additional_columns" in self.config:
+            output_columns.extend(self.config["additional_columns"])
+        
+        # Ensure all required columns exist
+        missing_columns = [col for col in output_columns if col not in self.processed_data.columns]
+        if missing_columns:
+            print(f"Warning: Missing columns in processed data: {missing_columns}")
+            # Remove missing columns from output_columns
+            output_columns = [col for col in output_columns if col in self.processed_data.columns]
+        
+        # Save data
+        self.processed_data[output_columns].to_csv(output_path, sep='\t', index=False)
         print(f"Processed data saved to: {output_path}")
+        print(f"Columns saved: {output_columns}")
     
     def calculate_metrics(self, df: pd.DataFrame, score_column: str = 'ABC Score') -> Dict[str, float]:
         """

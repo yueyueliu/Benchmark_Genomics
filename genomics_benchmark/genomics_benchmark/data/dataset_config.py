@@ -23,24 +23,21 @@ DATASET_CONFIG = {
         # Task-level common configuration
         "task_config": {
             "required_columns": {
-                "enhancer_loc": ["chr", "start", "end"],  # Enhancer location
-                "gene_info": ["gene_name", "gene_tss"],  # Gene information
-                "effect": ["Normalized HiC Contacts", "H3K27ac (RPM)", "Activity"],  # Effect size
-                "ABC Score": ["ABC Score"],
-                "label": "Significant"  # Calculated label
+                "enhancer_loc": ["chr", "start", "end"],  # Basic enhancer location
+                "gene_info": ["gene_name", "gene_tss"],  # Basic gene information
+                "label": "Significant"  # Binary label for positive/negative pairs
             },
-            "distance_threshold": 1000000,  # Enhancer-gene distance threshold in bp
+            "distance_threshold": 100000000,  # Enhancer-gene distance threshold in bp
             "output_columns": [
                 "chr", "start", "end",  # Enhancer location
-                # "strand",
                 "gene_name", "gene_tss",  # Gene information
                 "distance",  # Calculated distance
-                "ABC Score",  # Effect size
+                "ABC Score",  # Effect size (if available)
                 "labels"  # Calculated label
             ]
         },
         # Dataset-specific configuration
-        "fulco": {
+        "ABC_fulco": {
             "name": "Fulco Enhancer Dataset",
             "description": "Fulco K562 enhancer dataset",
             "genome_version": "hg19",  # Add genome version information
@@ -58,7 +55,32 @@ DATASET_CONFIG = {
                 "Activity": "Activity",
                 "ABC Score": "ABC Score",
                 "Significant": "Significant"
-            }
+            },
+            "additional_columns": []  # No additional columns needed
+        },
+        "Merged": {
+            "name": "E2G Enhancer Dataset",
+            "description": "E2G K562 enhancer dataset",
+            "genome_version": "hg38",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/enhancer/E2G/E2g.tsv",
+            "file_format": "tsv",
+            "column_mapping": {
+                # Mapping from source column names to standard column names
+                "chr": "chrom",
+                "start": "chromStart",
+                "end": "chromEnd",
+                "gene_name": "measuredGeneSymbol",
+                "gene_tss": "startTSS",
+                "ABC Score": "ABCScoreDNaseOnlyAvgHicTrack2",
+                "Significant": "Significant",
+                "hic_contact": "3DContactAvgHicTrack2",
+                "hic_contact_squared": "3DContactAvgHicTrack2_squared",
+                "activity_enh": "activityEnhDNaseOnlyAvgHicTrack2_squared",
+                "activity_prom": "activityPromDNaseOnlyAvgHicTrack2",
+            },
+            "additional_columns": [
+                "EffectSize",  
+            ]
         }
         # More datasets can be added...
     }

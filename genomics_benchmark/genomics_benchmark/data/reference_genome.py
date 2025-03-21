@@ -1,6 +1,8 @@
 """
 Reference genome processing module
 """
+import os
+import gzip
 from pathlib import Path
 from typing import Dict, Union
 from .dataset_config import DATASET_CONFIG
@@ -32,6 +34,29 @@ def get_dataset_config(task_name: str, dataset_name: str = None) -> dict:
         **DATASET_CONFIG[task_name][dataset_name]
     }
     return config
+
+def _decompress_gz(gz_path: Path) -> Path:
+    """
+    Decompress a .gz file
+    
+    Args:
+        gz_path: Path to the .gz file
+        
+    Returns:
+        Path to the decompressed file
+    """
+    output_path = gz_path.with_suffix('')  # Remove .gz extension
+    
+    if output_path.exists():
+        print(f"Decompressed file already exists: {output_path}")
+        return output_path
+        
+    print(f"Decompressing file: {gz_path}")
+    with gzip.open(gz_path, 'rb') as f_in:
+        with open(output_path, 'wb') as f_out:
+            f_out.write(f_in.read())
+    print(f"Decompressed to: {output_path}")
+    return output_path
 
 def download_reference_genome(
     genome_version: str,
@@ -66,17 +91,31 @@ def download_reference_genome(
     
     try:
         if file_type in ['fasta', 'both']:
-            fasta_path = downloader.download(
-                url=genome_config['fasta_url'],
-                force=False
-            )
+            # Check if decompressed file already exists
+            fasta_path = cache_dir / genome_config['fasta_url'].split('/')[-1].replace('.gz', '')
+            if not fasta_path.exists():
+                # Download and decompress
+                gz_path = downloader.download(
+                    url=genome_config['fasta_url'],
+                    force=False
+                )
+                fasta_path = _decompress_gz(gz_path)
+            else:
+                print(f"Using existing decompressed file: {fasta_path}")
             downloaded_files['fasta'] = fasta_path
             
         if file_type in ['gtf', 'both']:
-            gtf_path = downloader.download(
-                url=genome_config['gtf_url'],
-                force=False
-            )
+            # Check if decompressed file already exists
+            gtf_path = cache_dir / genome_config['gtf_url'].split('/')[-1].replace('.gz', '')
+            if not gtf_path.exists():
+                # Download and decompress
+                gz_path = downloader.download(
+                    url=genome_config['gtf_url'],
+                    force=False
+                )
+                gtf_path = _decompress_gz(gz_path)
+            else:
+                print(f"Using existing decompressed file: {gtf_path}")
             downloaded_files['gtf'] = gtf_path
             
     except Exception as e:
