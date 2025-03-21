@@ -157,5 +157,43 @@ DATASET_CONFIG = {
             ]
         }
         # More datasets can be added...
+    },
+    
+    "eqtl": {
+        # Task-level common configuration
+        "task_config": {
+            "required_columns": {
+                "gene_info": ["phenotype_id", "gene_name", "biotype"],  # 基因信息
+                "variant_info": ["variant_id", "pip", "af"],  # 变异信息
+                "effect_info": ["afc", "afc_se"]  # 效应信息
+            },
+            "output_columns": [
+                "phenotype_id", "gene_name", "biotype",  # 基因信息
+                "variant_id", "pip", "af",  # 变异信息
+                "afc", "afc_se",  # 效应信息
+                "labels"  # 标签（如果启用）
+            ]
+        },
+        # Dataset-specific configuration
+        "Adipose_Subcutaneous": {
+            "name": "Adipose Subcutaneous eQTL Dataset",
+            "description": "eQTL data from GTEx v10 for Adipose Subcutaneous tissue",
+            "genome_version": "hg38",
+            "data_url": "https://raw.githubusercontent.com/yueyueliu/Benchmark_Genomics/main/data/demo_online/eqtl/Adipose_Subcutaneous.v10.eQTLs.SuSiE_summary.parquet",
+            "file_format": "parquet",
+            "column_mapping": {
+                "phenotype_id": "phenotype_id",
+                "gene_name": "gene_name",
+                "biotype": "biotype",
+                "variant_id": "variant_id",
+                "pip": "pip",
+                "af": "af",
+                "cs_id": "cs_id",
+                "cs_size": "cs_size",
+                "afc": "afc",
+                "afc_se": "afc_se"
+            },
+            "additional_columns": []
+        }
     }
 } 
